@@ -1,5 +1,6 @@
 import ss.utils.TextIO;
 
+import javax.print.attribute.standard.DateTimeAtCompleted;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -289,6 +290,19 @@ public class Schedule {
 
     }
 
+    public ArrayList<String> getSpecificDateArray(String fileName) {
+
+        ArrayList<String> dateArray = getDateArray(fileName);
+        ArrayList<String> specificDateArray = new ArrayList<>();
+        for (int i = 1; i < dateArray.size(); i++) {
+            String[] splitter = dateArray.get(i).split("Date: ");
+            splitter = splitter[1].split("Weight: ");
+            String date = splitter[0].trim();
+            specificDateArray.add(date);
+        }
+        return specificDateArray;
+    }
+
     /**
      * Date array to string string.
      *
@@ -525,6 +539,30 @@ public class Schedule {
             String weight = arrOfText[0];
             outputList.add("Date: " + date +  "    Weight: " + weight);
         }
+        return outputList;
+    }
+
+    public ArrayList<String> extractDateValues(String fileName, String inputDate) {
+        ArrayList<String> outputList = new ArrayList<>();
+        String dateText = getDate(fileName, inputDate);
+
+
+
+        String[] arrOfText = dateText.split("Date: ");
+        arrOfText = arrOfText[1].split("\n\nWeight:");
+        String date = arrOfText[0];
+        arrOfText = arrOfText[1].split(" Kg|Kg");
+        String weight = arrOfText[0];
+        arrOfText = arrOfText[1].split("Food:\n");
+        arrOfText = arrOfText[1].split("\nTasks:\n");
+        String food = arrOfText[0];
+        String tasks = arrOfText[1];
+
+        outputList.add(date);
+        outputList.add(weight);
+        outputList.add(food);
+        outputList.add(tasks);
+
         return outputList;
     }
 
