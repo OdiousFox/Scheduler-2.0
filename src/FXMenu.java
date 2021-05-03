@@ -29,6 +29,8 @@ public class FXMenu extends Application {
     int latestTaskY = 13;
     int taskID = 0;
     int endRow = 14;
+    boolean editingActive = false;
+    String currentDate;
 
 
     public static void main(String[]args) {
@@ -73,6 +75,8 @@ public class FXMenu extends Application {
         ArrayList<TextField> taskFields = new ArrayList<>();
         taskFields.add(new TextField());
         Label tasksText = new Label();
+        // Label for date of edit date
+        Label editDate = new Label();
 
         // Buttons and Label for dateListButtons
         Button buttonDateDelete = new Button("Delete");
@@ -116,9 +120,10 @@ public class FXMenu extends Application {
         GridPane.setConstraints(buttonSettings,2, 0);
         GridPane.setConstraints(buttonExit, 0, 0);
 
-        // x y positions of NEW command elements.
+        // x y positions of New, Display date and Edit command elements.
         GridPane.setConstraints(labelDate, 1, 10);
         GridPane.setConstraints(inputDate, 2, 10);
+        GridPane.setConstraints(editDate, 2, 10);
         GridPane.setConstraints(labelWeight, 1, 11);
         GridPane.setConstraints(inputWeight, 2, 11);
         GridPane.setConstraints(labelFood, 1, foodRow);
@@ -183,13 +188,50 @@ public class FXMenu extends Application {
             ArrayList<String> dateArray = schedule.getDateArray(fileName);
             String[] list = dateArray.get(dateIndex).split("Date: ");
             list = list[1].split("Weight:");
-            String currentDate = list[0].trim();
+            currentDate = list[0].trim();
 
             viewedDate.setText("Current date: " + currentDate);
             buttonDateDelete.setOnAction(f -> {
                 schedule.deleteDate(fileName, currentDate);
                 dateTableView.getItems().clear();
                 dateTableView.setItems(getDate());
+                dateDisplay.getChildren().clear();
+            });
+
+            buttonDateEdit.setOnAction(g -> {
+                // Values for dateInfo.get();
+                // date   -> 0
+                // weight -> 1
+                // food   -> 2
+                // tasks  -> 3
+                ArrayList<String> dateInfo = schedule.extractDateValues(fileName, currentDate);
+
+                editingActive = true;
+
+                editDate.setText(currentDate);
+                inputWeight.setText(dateInfo.get(1).trim());
+                String[] foodList = dateInfo.get(2).split("\\[ \\] |\\[x\\] ");
+                String[] tasksList = dateInfo.get(3).split("\\[ \\] |\\[x\\] ");
+                if (!foodList[0].trim().equals("No food.")) {
+                    for (int i = 1; i < foodList.length; i++) {
+                        foodFields.get(i - 1).setText(foodList[i]);
+                        buttonAddFood.fire();
+                    }
+
+                    buttonRemoveFood.fire();
+                }
+                if (!tasksList[0].trim().equals("No tasks.")) {
+                    for (int i = 1; i < tasksList.length; i++) {
+                        taskFields.get(i - 1).setText(tasksList[i]);
+                        buttonAddTasks.fire();
+                    }
+                    buttonRemoveTasks.fire();
+                }
+                newSchedule.getChildren().addAll(labelDate, labelWeight,
+                        labelFood, labelTasks, editDate, inputWeight, foodFields.get(0), taskFields.get(0),
+                        buttonNewComplete, buttonNewCancel, buttonAddFood, buttonRemoveFood, buttonAddTasks,
+                        buttonRemoveTasks);
+
                 dateDisplay.getChildren().clear();
             });
 
@@ -306,7 +348,13 @@ public class FXMenu extends Application {
             } else {
                 inputDate.setStyle("-fx-text-box-border: #b22222; -fx-focus-color: #B22222;");
                 dateCheck = false;
+                if (editingActive) {
+                    date = currentDate;
+                    dateCheck = true;
+                }
             }
+
+
 
             try {
                 weight = Double.parseDouble(inputWeight.getText());
@@ -319,12 +367,16 @@ public class FXMenu extends Application {
                 weightCheck = false;
             }
             if (dateCheck && weightCheck) {
+                if (editingActive) {
+                    schedule.deleteDate(fileName, date);
+                }
                 schedule.makeNewDayScheduleFX(fileName, date, weight, fieldsToString(foodFields), fieldsToString(taskFields));
-
                 resetNewCommand(buttonNewComplete, buttonNewCancel, buttonAddFood,
                         buttonRemoveFood, buttonAddTasks, buttonRemoveTasks, inputDate,
                         inputWeight, labelFood, foodFields, labelTasks, taskFields, newSchedule);
             }
+
+            editingActive = false;
             dateTableView.getItems().clear();
             dateTableView.setItems(getDate());
         });

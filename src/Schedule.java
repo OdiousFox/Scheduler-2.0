@@ -558,10 +558,10 @@ public class Schedule {
         String food = arrOfText[0];
         String tasks = arrOfText[1];
 
-        outputList.add(date);
-        outputList.add(weight);
-        outputList.add(food);
-        outputList.add(tasks);
+        outputList.add(date); // 0
+        outputList.add(weight); // 1
+        outputList.add(food); // 2
+        outputList.add(tasks); // 3
 
         return outputList;
     }
