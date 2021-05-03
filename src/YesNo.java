@@ -53,16 +53,17 @@ public class YesNo {
                 "[x] Make food\n" +
                 "\n";
 
-        String[] arrOfText = dateText.split("Date: ");
-        arrOfText = arrOfText[1].split("\n\nWeight:");
-        String date = arrOfText[0];
-        arrOfText = arrOfText[1].split(" Kg");
-        double weight = Double.parseDouble(arrOfText[0]);
-        arrOfText = arrOfText[1].split("Food:\n");
-        arrOfText = arrOfText[1].split("\n\n\nTasks:\n");
-        String food = arrOfText[0];
-        String tasks = arrOfText[1];
-        System.out.println(date + "\n\n" + weight + "\n\n" + food + "\n\n" + tasks);
+//        String[] arrOfText = dateText.split("Date: ");
+//        arrOfText = arrOfText[1].split("\n\nWeight:");
+//        String date = arrOfText[0];
+//        arrOfText = arrOfText[1].split(" Kg");
+//        double weight = Double.parseDouble(arrOfText[0]);
+//        arrOfText = arrOfText[1].split("Food:\n");
+//        arrOfText = arrOfText[1].split("\n\n\nTasks:\n");
+//        String food = arrOfText[0];
+//        String tasks = arrOfText[1];
+//        System.out.println(date + "\n\n" + weight + "\n\n" + food + "\n\n" + tasks);
+//        System.out.println(schedule.getCheckValues(dateText));
 //        String[] arrOfText = dateText.split("Date: ");
 //        arrOfText = arrOfText[1].split("\n\nWeight:");
 //        arrOfText = arrOfText[0].split("\\.");
