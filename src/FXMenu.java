@@ -5,10 +5,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -78,6 +82,12 @@ public class FXMenu extends Application {
         // Label for date of edit date
         Label editDate = new Label();
 
+        // Checkboxes for view date
+        ArrayList<CheckBox> checkBoxFood = new ArrayList<>();
+        checkBoxFood.add(new CheckBox());
+        ArrayList<CheckBox> checkBoxTasks = new ArrayList<>();
+        checkBoxTasks.add(new CheckBox());
+
         // Buttons and Label for dateListButtons
         Button buttonDateDelete = new Button("Delete");
         Button buttonDateEdit = new Button("Edit");
@@ -128,10 +138,12 @@ public class FXMenu extends Application {
         GridPane.setConstraints(inputWeight, 2, 11);
         GridPane.setConstraints(labelFood, 1, foodRow);
         GridPane.setConstraints(foodFields.get(0), 2, foodRow);
+        GridPane.setConstraints(checkBoxFood.get(0), 2, foodRow);
         GridPane.setConstraints(buttonAddFood, 3, foodRow);
         GridPane.setConstraints(buttonRemoveFood, 4, foodRow);
         GridPane.setConstraints(labelTasks, 1, taskRow);
         GridPane.setConstraints(taskFields.get(0), 2, taskRow);
+        GridPane.setConstraints(checkBoxTasks.get(0), 2, taskRow);
         GridPane.setConstraints(buttonAddTasks, 3, taskRow);
         GridPane.setConstraints(buttonRemoveTasks, 4, taskRow);
         GridPane.setConstraints(buttonNewComplete, 1, endRow);
@@ -166,7 +178,7 @@ public class FXMenu extends Application {
 
         dateTableView = new TableView<>();
         dateTableView.setItems(getDate());
-        dateTableView.setPrefWidth(244);
+        dateTableView.setPrefWidth(245);
         dateTableView.getColumns().setAll(dateColumn, weightColumn, foodColumn, tasksColumn);
 
         // Adds buttons to top bar
@@ -190,6 +202,17 @@ public class FXMenu extends Application {
             list = list[1].split("Weight:");
             currentDate = list[0].trim();
 
+            // Values for dateInfo.get();
+            // date   -> 0
+            // weight -> 1
+            // food   -> 2
+            // tasks  -> 3
+            ArrayList<String> dateInfo = schedule.extractDateValues(fileName, currentDate);
+            dateText.setText(dateInfo.get(0));
+            weightText.setText(dateInfo.get(1));
+            String[] foodList = dateInfo.get(2).split("\\[ \\] |\\[x\\] ");
+            String[] tasksList = dateInfo.get(3).split("\\[ \\] |\\[x\\] ");
+
             viewedDate.setText("Current date: " + currentDate);
             buttonDateDelete.setOnAction(f -> {
                 schedule.deleteDate(fileName, currentDate);
@@ -199,19 +222,10 @@ public class FXMenu extends Application {
             });
 
             buttonDateEdit.setOnAction(g -> {
-                // Values for dateInfo.get();
-                // date   -> 0
-                // weight -> 1
-                // food   -> 2
-                // tasks  -> 3
-                ArrayList<String> dateInfo = schedule.extractDateValues(fileName, currentDate);
-
                 editingActive = true;
 
                 editDate.setText(currentDate);
                 inputWeight.setText(dateInfo.get(1).trim());
-                String[] foodList = dateInfo.get(2).split("\\[ \\] |\\[x\\] ");
-                String[] tasksList = dateInfo.get(3).split("\\[ \\] |\\[x\\] ");
                 if (!foodList[0].trim().equals("No food.")) {
                     for (int i = 1; i < foodList.length; i++) {
                         foodFields.get(i - 1).setText(foodList[i]);
@@ -235,10 +249,73 @@ public class FXMenu extends Application {
                 dateDisplay.getChildren().clear();
             });
 
-            displayDate(dateDisplay, currentDate, labelDate, dateText, labelWeight,
-                    weightText, labelFood, foodText, labelTasks, tasksText, buttonNewComplete,
-                    buttonNewCancel, buttonAddFood, buttonRemoveFood, buttonAddTasks, buttonRemoveTasks,
-                    inputDate, inputWeight, foodFields, taskFields, newSchedule);
+            resetNewCommand(buttonNewComplete, buttonNewCancel, buttonAddFood,
+                    buttonRemoveFood, buttonAddTasks, buttonRemoveTasks, inputDate,
+                    inputWeight, labelFood, foodFields, labelTasks, taskFields, newSchedule);
+
+            dateDisplay.getChildren().clear();
+            checkBoxFood.clear();
+            checkBoxTasks.clear();
+
+            // Adding food text and check boxes for it
+            if (!foodList[0].trim().equals("No food.")) {
+                boolean firstLoop = false;
+                for (int i = 1; i < foodList.length; i++) {
+                    taskRow = taskRow + 1;
+                    endRow = endRow + 1;
+
+                    if (!firstLoop) {
+                        checkBoxFood.add(new CheckBox());
+                    }
+                    checkBoxFood.get(foodID).setText(foodList[i]);
+                    GridPane.setConstraints(checkBoxFood.get(foodID), 2, latestFoodY);
+                    dateDisplay.getChildren().add(checkBoxFood.get(foodID));
+
+                    GridPane.setConstraints(labelTasks, 1, taskRow);
+                    for (int f = 0; i < checkBoxTasks.size(); i++) {
+                        GridPane.setConstraints(checkBoxTasks.get(i), 2, taskRow + i);
+                    }
+                    latestTaskY = taskRow + taskFields.size() - 1;
+                    GridPane.setConstraints(buttonAddTasks, 3, taskRow);
+                    GridPane.setConstraints(buttonRemoveTasks, 4, taskRow);
+                    GridPane.setConstraints(buttonNewComplete, 1, latestTaskY + 1);
+                    GridPane.setConstraints(buttonNewCancel, 2, latestTaskY + 1);
+                    foodID = foodID + 1;
+                    latestFoodY = latestFoodY + 1;
+                }
+
+//                buttonRemoveFood.fire();
+            } else {
+                foodText.setText(dateInfo.get(2));
+            }
+
+
+            if (!tasksList[0].trim().equals("No tasks.")) {
+                boolean firstLoop = false;
+                for (int i = 1; i < tasksList.length; i++) {
+                    endRow = endRow + 1;
+
+                    if (!firstLoop) {
+                        checkBoxTasks.add(new CheckBox());
+                    }
+                    checkBoxTasks.get(taskID).setText(tasksList[i]);
+                    GridPane.setConstraints(checkBoxTasks.get(taskID), 2, latestTaskY);
+                    dateDisplay.getChildren().add(checkBoxTasks.get(taskID));
+
+                    GridPane.setConstraints(labelTasks, 1, taskRow);
+                    GridPane.setConstraints(taskFields.get(0), 2, taskRow);
+                    GridPane.setConstraints(buttonAddTasks, 3, taskRow);
+                    GridPane.setConstraints(buttonRemoveTasks, 4, taskRow);
+                    GridPane.setConstraints(buttonNewComplete, 1, endRow);
+                    GridPane.setConstraints(buttonNewCancel, 2, endRow);
+
+                    latestTaskY = latestTaskY + 1;
+                    taskID = taskID + 1;
+                }
+            } else {
+                foodText.setText(dateInfo.get(2));
+            }
+            dateDisplay.getChildren().addAll(labelDate, dateText, labelWeight, weightText, labelFood, foodText, labelTasks, tasksText);
             });
 
         // Adds secondary layouts to leftPane.
@@ -259,14 +336,12 @@ public class FXMenu extends Application {
     // Gets all of the dates
     public ObservableList<Date> getDate(){
         ObservableList<Date> dates = FXCollections.observableArrayList();
-        Button buttonDateDelete = new Button("Delete");
-        Button buttonDateEdit = new Button("Edit");
         ArrayList<String> specificDateArray = schedule.getSpecificDateArray(fileName);
         for (int i = 0;  i < specificDateArray.size(); i++) {
             ArrayList<String> dateInfo = schedule.extractDateValues(fileName, specificDateArray.get(i));
 
 
-            dates.add(new Date(dateInfo.get(0), dateInfo.get(1), makeDoneCount(dateInfo.get(2)), makeDoneCount(dateInfo.get(3)), buttonDateDelete, buttonDateEdit));
+            dates.add(new Date(dateInfo.get(0), dateInfo.get(1), makeDoneCount(dateInfo.get(2)), makeDoneCount(dateInfo.get(3))));
         }
         dates.add(new Date());
         return dates;
@@ -285,25 +360,7 @@ public class FXMenu extends Application {
         return finished + " | " + total;
     }
 
-    public void displayDate(GridPane dateDisplay, String date,Label labelDate, Label dateText, Label labelWeight, Label weightText,
-                            Label labelFood, Label foodText, Label labelTasks, Label tasksText, Button buttonNewComplete,
-                            Button buttonNewCancel, Button buttonAddFood, Button buttonRemoveFood, Button buttonAddTasks,
-                            Button buttonRemoveTasks, TextField inputDate, TextField inputWeight, ArrayList<TextField> foodFields,
-                            ArrayList<TextField> taskFields, GridPane newSchedule) {
 
-        resetNewCommand(buttonNewComplete, buttonNewCancel, buttonAddFood,
-                buttonRemoveFood, buttonAddTasks, buttonRemoveTasks, inputDate,
-                inputWeight, labelFood, foodFields, labelTasks, taskFields, newSchedule);
-
-        dateDisplay.getChildren().clear();
-        ArrayList<String> dateInfo = schedule.extractDateValues(fileName, date);
-        dateText.setText(dateInfo.get(0));
-        weightText.setText(dateInfo.get(1));
-        foodText.setText(dateInfo.get(2));
-        tasksText.setText(dateInfo.get(3).trim());
-        dateDisplay.getChildren().addAll(labelDate, dateText, labelWeight, weightText, labelFood, foodText, labelTasks, tasksText);
-
-    }
 
 
 

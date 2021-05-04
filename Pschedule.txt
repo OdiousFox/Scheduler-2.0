@@ -1,4 +1,3 @@
-
 Date: 29.05.2021
 
 Weight: 78.0 Kg
@@ -7,17 +6,6 @@ Food:
 No food.
 Tasks:
 No tasks.
-
-
-Date: 30.04.2021
-
-Weight: 12.0 Kg
-
-Food:
-[ ] 1
-
-Tasks:
-[ ] 1
 
 
 Date: 28.04.2021
@@ -297,4 +285,5 @@ Food:
 No food.
 Tasks:
 No tasks.
+
 
