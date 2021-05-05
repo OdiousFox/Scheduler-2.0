@@ -12,9 +12,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class FXMenu extends Application {
@@ -34,6 +33,8 @@ public class FXMenu extends Application {
     int taskID = 0;
     int endRow = 14;
     boolean editingActive = false;
+    ArrayList<Boolean> editFoodCheckBoxValues;
+    ArrayList<Boolean> editTasksCheckBoxValues;
     String currentDate;
 
 
@@ -207,11 +208,11 @@ public class FXMenu extends Application {
             // weight -> 1
             // food   -> 2
             // tasks  -> 3
-            ArrayList<String> dateInfo = schedule.extractDateValues(fileName, currentDate);
-            dateText.setText(dateInfo.get(0));
-            weightText.setText(dateInfo.get(1));
-            String[] foodList = dateInfo.get(2).split("\\[ \\] |\\[x\\] ");
-            String[] tasksList = dateInfo.get(3).split("\\[ \\] |\\[x\\] ");
+            AtomicReference<ArrayList<String>> dateInfo = new AtomicReference<>(schedule.extractDateValues(fileName, currentDate));
+            dateText.setText(dateInfo.get().get(0));
+            weightText.setText(dateInfo.get().get(1));
+            String[] foodList = dateInfo.get().get(2).split("\\[ \\] |\\[x\\] ");
+            String[] tasksList = dateInfo.get().get(3).split("\\[ \\] |\\[x\\] ");
 
             viewedDate.setText("Current date: " + currentDate);
             buttonDateDelete.setOnAction(f -> {
@@ -225,7 +226,7 @@ public class FXMenu extends Application {
                 editingActive = true;
 
                 editDate.setText(currentDate);
-                inputWeight.setText(dateInfo.get(1).trim());
+                inputWeight.setText(dateInfo.get().get(1).trim());
                 if (!foodList[0].trim().equals("No food.")) {
                     for (int i = 1; i < foodList.length; i++) {
                         foodFields.get(i - 1).setText(foodList[i]);
@@ -259,6 +260,7 @@ public class FXMenu extends Application {
 
             // Adding food text and check boxes for it
             if (!foodList[0].trim().equals("No food.")) {
+                AtomicReference<ArrayList<Boolean>> foodCheckBoxValues = new AtomicReference<>(schedule.getCheckValues(dateInfo.get().get(2)));
                 boolean firstLoop = false;
                 for (int i = 1; i < foodList.length; i++) {
                     taskRow = taskRow + 1;
@@ -267,15 +269,40 @@ public class FXMenu extends Application {
                     if (!firstLoop) {
                         checkBoxFood.add(new CheckBox());
                     }
-                    checkBoxFood.get(foodID).setText(foodList[i]);
+                    checkBoxFood.get(foodID).setText(foodList[i].trim());
                     GridPane.setConstraints(checkBoxFood.get(foodID), 2, latestFoodY);
                     dateDisplay.getChildren().add(checkBoxFood.get(foodID));
+
+                    checkBoxFood.get(foodID).setSelected(foodCheckBoxValues.get().get(foodID));
+                    int checkBoxNr = foodID;
+                    checkBoxFood.get(foodID).setOnAction(f -> {
+                        dateInfo.set(schedule.extractDateValues(fileName, currentDate));
+                        foodCheckBoxValues.set(schedule.getCheckValues(dateInfo.get().get(2)));
+                        schedule.invertBoolean(foodCheckBoxValues.get(), checkBoxNr);
+                        schedule.deleteDate(fileName, currentDate);
+                        String food = schedule.makeCheckList(dateInfo.get().get(2).split("\\[ \\] |\\[x\\] "), foodCheckBoxValues.get());
+                        String text = "Date: " + dateInfo.get().get(0) + "\n\n" +
+                                "Weight: "+ dateInfo.get().get(1).trim() + " Kg\n\n" +
+                                "Food:\n" +
+                                food + "\n\n" + "Tasks:\n" +
+                                dateInfo.get().get(3);
+                        schedule.writeToFile(fileName, "\n\n\n\n\n\n\n" + text, true);
+                        System.out.println(text);
+                        schedule.sort(fileName);
+                        dateTableView.getItems().clear();
+                        dateTableView.setItems(getDate());
+
+                        dateInfo.set(schedule.extractDateValues(fileName, currentDate));
+                        editFoodCheckBoxValues = schedule.getCheckValues(dateInfo.get().get(2));
+                        editTasksCheckBoxValues = schedule.getCheckValues(dateInfo.get().get(3));
+                    });
 
                     GridPane.setConstraints(labelTasks, 1, taskRow);
                     for (int f = 0; i < checkBoxTasks.size(); i++) {
                         GridPane.setConstraints(checkBoxTasks.get(i), 2, taskRow + i);
                     }
                     latestTaskY = taskRow + taskFields.size() - 1;
+                    GridPane.setConstraints(tasksText, 2, taskRow);
                     GridPane.setConstraints(buttonAddTasks, 3, taskRow);
                     GridPane.setConstraints(buttonRemoveTasks, 4, taskRow);
                     GridPane.setConstraints(buttonNewComplete, 1, latestTaskY + 1);
@@ -283,24 +310,49 @@ public class FXMenu extends Application {
                     foodID = foodID + 1;
                     latestFoodY = latestFoodY + 1;
                 }
-
-//                buttonRemoveFood.fire();
             } else {
-                foodText.setText(dateInfo.get(2));
+                GridPane.setConstraints(tasksText, 2, taskRow);
+                foodText.setText(dateInfo.get().get(2));
+                dateDisplay.getChildren().add(foodText);
             }
 
-
             if (!tasksList[0].trim().equals("No tasks.")) {
+                AtomicReference<ArrayList<Boolean>> tasksCheckBoxValues = new AtomicReference<>(schedule.getCheckValues(dateInfo.get().get(3)));
                 boolean firstLoop = false;
+
                 for (int i = 1; i < tasksList.length; i++) {
                     endRow = endRow + 1;
 
                     if (!firstLoop) {
                         checkBoxTasks.add(new CheckBox());
                     }
-                    checkBoxTasks.get(taskID).setText(tasksList[i]);
+                    checkBoxTasks.get(taskID).setText(tasksList[i].trim());
                     GridPane.setConstraints(checkBoxTasks.get(taskID), 2, latestTaskY);
                     dateDisplay.getChildren().add(checkBoxTasks.get(taskID));
+
+                    checkBoxTasks.get(taskID).setSelected(tasksCheckBoxValues.get().get(taskID));
+                    int checkBoxNr = taskID;
+                    checkBoxTasks.get(taskID).setOnAction(f -> {
+                        dateInfo.set(schedule.extractDateValues(fileName, currentDate));
+                        tasksCheckBoxValues.set(schedule.getCheckValues(dateInfo.get().get(3)));
+                        schedule.invertBoolean(tasksCheckBoxValues.get(), checkBoxNr);
+                        schedule.deleteDate(fileName, currentDate);
+                        String tasks = schedule.makeCheckList(dateInfo.get().get(3).split("\\[ \\] |\\[x\\] "), tasksCheckBoxValues.get());
+                        String text = "Date: " + dateInfo.get().get(0) + "\n\n" +
+                                "Weight: "+ dateInfo.get().get(1).trim() + " Kg\n\n" +
+                                "Food:\n" +
+                                dateInfo.get().get(2) + "\n\n" + "Tasks:\n" +
+                                tasks;
+                        schedule.writeToFile(fileName, "\n\n\n\n\n\n\n" + text, true);
+                        System.out.println(text);
+                        schedule.sort(fileName);
+                        dateTableView.getItems().clear();
+                        dateTableView.setItems(getDate());
+
+                        dateInfo.set(schedule.extractDateValues(fileName, currentDate));
+                        editFoodCheckBoxValues = schedule.getCheckValues(dateInfo.get().get(2));
+                        editTasksCheckBoxValues = schedule.getCheckValues(dateInfo.get().get(3));
+                    });
 
                     GridPane.setConstraints(labelTasks, 1, taskRow);
                     GridPane.setConstraints(taskFields.get(0), 2, taskRow);
@@ -313,9 +365,18 @@ public class FXMenu extends Application {
                     taskID = taskID + 1;
                 }
             } else {
-                foodText.setText(dateInfo.get(2));
+                tasksText.setText(dateInfo.get().get(3));
+                dateDisplay.getChildren().add(tasksText);
             }
-            dateDisplay.getChildren().addAll(labelDate, dateText, labelWeight, weightText, labelFood, foodText, labelTasks, tasksText);
+
+            foodRow = 12;
+            latestFoodY = 12;
+            foodID = 0;
+            taskRow = 13;
+            latestTaskY = 13;
+            taskID = 0;
+            endRow = 14;
+            dateDisplay.getChildren().addAll(labelDate, dateText, labelWeight, weightText, labelFood, labelTasks);
             });
 
         // Adds secondary layouts to leftPane.
@@ -327,7 +388,7 @@ public class FXMenu extends Application {
         root.setRight(rightPane);
 
         // Sets layout, window size, scene and then displays the window.
-        Scene scene = new Scene(root, 750, 500);
+        Scene scene = new Scene(root, 600, 550);
         window.setScene(scene);
         window.show();
 
@@ -381,6 +442,10 @@ public class FXMenu extends Application {
         
         // Adds NEW command elements when the button is pressed.
         buttonNew.setOnAction(e -> {
+            resetNewCommand(buttonNewComplete, buttonNewCancel, buttonAddFood,
+                    buttonRemoveFood, buttonAddTasks, buttonRemoveTasks, inputDate,
+                    inputWeight, labelFood, foodFields, labelTasks, taskFields, newSchedule);
+            newSchedule.getChildren().clear();
 
             newSchedule.getChildren().addAll(labelDate, labelWeight,
                 labelFood, labelTasks, inputDate, inputWeight, foodFields.get(0), taskFields.get(0),
@@ -426,8 +491,10 @@ public class FXMenu extends Application {
             if (dateCheck && weightCheck) {
                 if (editingActive) {
                     schedule.deleteDate(fileName, date);
+                    schedule.makeNewDayScheduleFX(fileName, date, weight, fieldsToString(foodFields), fieldsToString(taskFields), editFoodCheckBoxValues, editTasksCheckBoxValues);
+                } else {
+                    schedule.makeNewDayScheduleFX(fileName, date, weight, fieldsToString(foodFields), fieldsToString(taskFields));
                 }
-                schedule.makeNewDayScheduleFX(fileName, date, weight, fieldsToString(foodFields), fieldsToString(taskFields));
                 resetNewCommand(buttonNewComplete, buttonNewCancel, buttonAddFood,
                         buttonRemoveFood, buttonAddTasks, buttonRemoveTasks, inputDate,
                         inputWeight, labelFood, foodFields, labelTasks, taskFields, newSchedule);

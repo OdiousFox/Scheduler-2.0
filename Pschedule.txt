@@ -1,3 +1,22 @@
+
+Date: 30.05.2021
+
+Weight: 70.0 Kg
+
+Food:
+[ ] cc
+[x] ninini
+[ ] ririri
+
+
+
+
+Tasks:
+[x] bcc
+[x] risisi
+[ ] chibiri
+
+
 Date: 29.05.2021
 
 Weight: 78.0 Kg
@@ -6,33 +25,6 @@ Food:
 No food.
 Tasks:
 No tasks.
-
-
-Date: 28.04.2021
-
-Weight: 0.0 Kg
-
-Food:
-[ ] Cereal
-[ ] Pate
-
-Tasks:
-[ ] Programming Morning
-[ ] DayZ
-[ ] Programming Evening
-
-
-Date: 24.04.2021
-
-Weight: 69.0 Kg
-
-Food:
-[ ] left shoe
-[ ] right shoe
-
-Tasks:
-[ ] 7 - 8 eat left boot
-[ ] 8 - 21 eat right boot
 
 
 Date: 23.04.2021
@@ -285,5 +277,4 @@ Food:
 No food.
 Tasks:
 No tasks.
-
 

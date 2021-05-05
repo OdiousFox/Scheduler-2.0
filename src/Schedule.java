@@ -529,6 +529,55 @@ public class Schedule {
         sort(fileName);
     }
 
+    public void makeNewDayScheduleFX(String fileName, String date, double weight, String food, String tasks, ArrayList<Boolean> foodCheckBoxValues, ArrayList<Boolean> tasksCheckBoxValues) {
+
+
+        // Food input formatting into a checklist
+        food = makeCheckList(food);
+        if (food.equals("none")) {
+            food = "No food.";
+        }
+
+        // Task input formatting into a checklist
+        tasks = makeCheckList(tasks);
+        if (tasks.equals("none")) {
+            tasks = "No tasks.";
+        }
+
+        ArrayList<Boolean> outFoodCheckBoxValues = getCheckValues(food);
+        ArrayList<Boolean> outTasksCheckBoxValues = getCheckValues(tasks);
+        if (outFoodCheckBoxValues.size() <= foodCheckBoxValues.size()) {
+            for (int i = 0; i < outFoodCheckBoxValues.size(); i++) {
+                outFoodCheckBoxValues.set(i, foodCheckBoxValues.get(i));
+            }
+        } else {
+            for (int i = 0; i < foodCheckBoxValues.size(); i++) {
+                outFoodCheckBoxValues.set(i, foodCheckBoxValues.get(i));
+            }
+        }
+        if (outTasksCheckBoxValues.size() <= tasksCheckBoxValues.size()) {
+            for (int i = 0; i < outTasksCheckBoxValues.size(); i++) {
+                outTasksCheckBoxValues.set(i, tasksCheckBoxValues.get(i));
+            }
+        } else {
+            for (int i = 0; i < tasksCheckBoxValues.size(); i++) {
+                outTasksCheckBoxValues.set(i, tasksCheckBoxValues.get(i));
+            }
+        }
+        food = makeCheckList(food.split("\\[ \\] |\\[x\\] "), outFoodCheckBoxValues);
+        tasks = makeCheckList(tasks.split("\\[ \\] |\\[x\\] "), outTasksCheckBoxValues);
+
+        // The schedule being made
+        String schedule = "\n" + "\n" + "Date: " + date + "\n\n" +
+                "Weight: " + weight + " Kg" + "\n\n" +
+                "Food:" + "\n" + food + "\n" + "Tasks:" + "\n" + tasks;
+
+        // Printing out the schedule for debugging and also writing it into the file
+        System.out.println(schedule);
+        writeToFile(fileName, schedule, true);
+        sort(fileName);
+    }
+
     public ArrayList<String> makeDateListInfo(ArrayList<String> dateArray) {
         ArrayList<String> outputList = new ArrayList<>();
         for(int i = 1; i < dateArray.size(); i++) {
@@ -565,6 +614,8 @@ public class Schedule {
 
         return outputList;
     }
+
+
 
 
 }
