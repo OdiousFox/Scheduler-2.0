@@ -33,7 +33,7 @@ Weight: 83.7 Kg
 
 Food:
 [x] Pizza
-[x] 8 Spicy nuggets
+[x] 8 Spicy men
 
 
 Tasks:
@@ -45,7 +45,7 @@ Date: 22.04.2021
 Weight: 83.9 Kg
 
 Food:
-[ ] Chicken strips from Dominos
+[ ] Chicken
 
 Tasks:
 No tasks.
@@ -86,13 +86,13 @@ Date: 18.04.2021
 Weight: 84.7 Kg
 
 Food:
-[ ] 2 Lurpak bread slices
+[ ] 2 bread
 [ ] Soup
 
 Tasks:
 [ ] 09 - 11 Morning Routine
 [ ] 11 - 14 S.A. Programming
-[ ] 14 - 18 DayZ with Asan
+[ ] 14 - 18 DayZ
 [ ] 18+ Free time
 
 
@@ -101,7 +101,7 @@ Date: 17.04.2021
 Weight: 85.1 Kg
 
 Food:
-[x] Bread with Lurpak
+[x] Bread
 [x] Salami
 
 
@@ -125,7 +125,7 @@ Weight: 85.2 Kg
 
 Food:
 [x] Sandwich
-[x] 1000  calorie snack
+[x] Blue Bazzy
 
 
 Tasks:
@@ -186,7 +186,7 @@ Date: 28.03.2021
 Weight: 86.7Kg
 
 Food:
-[x] Dominos Pizza and Chicken Strips
+[x] cooked bread 
 
 Tasks:
 No tasks.
