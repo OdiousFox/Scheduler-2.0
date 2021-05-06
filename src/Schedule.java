@@ -1,6 +1,4 @@
-import ss.utils.TextIO;
 
-import javax.print.attribute.standard.DateTimeAtCompleted;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -14,54 +12,6 @@ import java.util.Scanner;
  */
 public class Schedule {
 
-
-    /**
-     * Make new day schedule.
-     *
-     * @param fileName the file name
-     */
-    public void makeNewDaySchedule(String fileName) {
-
-        System.out.println("Please input the date.  Example: 01.01.2021");
-        String date = formatDate(TextIO.getlnString());
-        boolean end = false;
-        while (!end){
-            if (date.equals("INVALID")) {
-                System.out.println("Invalid date, try again.");
-                date = formatDate(TextIO.getlnString());
-            } else if (fileContains(fileName, date)){
-                System.out.println("A schedule on this date already exists, try again.");
-                date = formatDate(TextIO.getlnString());
-            } else {
-                end = true;
-            }
-        }
-
-
-
-        System.out.println("Please input your weight.   Example: 70");
-        double weight = TextIO.getlnDouble();
-
-        System.out.println("Input the food.   Example: Food 1, Food 2, ...");
-        String food = makeCheckList(TextIO.getlnString());
-        if (food.equals("none")) {
-            food = "No food.";
-        }
-
-        System.out.println("Input the tasks.    Example: Task 1, Task 2, ...");
-        String tasks = makeCheckList(TextIO.getlnString());
-        if (tasks.equals("none")) {
-            tasks = "No tasks.";
-        }
-
-        String schedule = "\n" + "\n" + "Date: " + date + "\n\n" +
-                "Weight: " + weight + " Kg" + "\n\n" +
-                "Food:" + "\n" + food + "\n" + "Tasks:" + "\n" + tasks;
-
-        System.out.println(schedule);
-        writeToFile(fileName, schedule, true);
-
-    }
 
     /**
      * Format date string.
@@ -106,24 +56,6 @@ public class Schedule {
 
 
     /**
-     * Make file.
-     *
-     * @param fileName the file name
-     */
-    public void makeFile(String fileName) {
-
-        try {
-
-            new File(fileName).createNewFile();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
-    /**
      * Write to file.
      *
      * @param fileName the file name
@@ -162,19 +94,6 @@ public class Schedule {
             e.printStackTrace();
             return "ERROR";
         }
-
-    }
-
-    /**
-     * File contains boolean.
-     *
-     * @param fileName       the file name
-     * @param searchedString the searched string
-     * @return the boolean
-     */
-    public boolean fileContains(String fileName, String searchedString) {
-
-        return (readFile(fileName).contains(searchedString));
 
     }
 
@@ -367,98 +286,6 @@ public class Schedule {
 
     }
 
-    public void editDate(String fileName, String date, String section) {
-
-        String dateText = getDate(fileName, date);
-        deleteDate(fileName, date);
-
-        String[] arrOfText = dateText.split("Weight: ");
-        arrOfText = arrOfText[1].split(" Kg");
-        double weight = Double.parseDouble(arrOfText[0]);
-        arrOfText = arrOfText[1].split("Food:\n");
-        arrOfText = arrOfText[1].split("\n\nTasks:\n");
-        String food = arrOfText[0];
-        String tasks = arrOfText[1];
-
-        if (section.equals("weight")) {
-            System.out.print("Enter weight: ");
-            weight = TextIO.getlnDouble();
-
-        } else if (section.equals("food")) {
-
-            ArrayList<Boolean> checkStates = getCheckValues(food);
-            String[] foodList = food.split("\\[ \\] |\\[x\\] ");
-            System.out.println("Which item would you like to edit? \n\n" + checkToNumber(food));
-            int number = TextIO.getlnInt();
-            System.out.print("Enter food:");
-            foodList[number] = TextIO.getlnString();
-            food = makeCheckList(foodList, checkStates);
-
-        } else if (section.equals("tasks")) {
-
-            ArrayList<Boolean> checkStates = getCheckValues(tasks);
-            String[] taskList = tasks.split("\\[ \\] |\\[x\\] ");
-            System.out.println("Which task would you like to edit? \n\n" + checkToNumber(tasks));
-            int number = TextIO.getlnInt();
-            System.out.print("Enter task:");
-            taskList[number] = TextIO.getlnString();
-            tasks = makeCheckList(taskList, checkStates);
-        }
-        String text = "Date: " + date + "\n\n" +
-                "Weight: "+ weight + " Kg\n\n" +
-                "Food:\n" +
-                food + "\n\n" + "Tasks:\n" +
-                tasks;
-        writeToFile(fileName, "\n\n\n\n\n\n\n" + text, true);
-        System.out.println(text);
-
-    }
-
-    public void editDateCheck(String fileName, String date, String section) {
-
-        String dateText = getDate(fileName, date);
-        deleteDate(fileName, date);
-
-        String[] arrOfText = dateText.split("Weight: ");
-        arrOfText = arrOfText[1].split(" Kg");
-        double weight = Double.parseDouble(arrOfText[0]);
-        arrOfText = arrOfText[1].split("Food:\n");
-        arrOfText = arrOfText[1].split("\n\nTasks:\n");
-        String food = arrOfText[0];
-        String tasks = arrOfText[1];
-
-        if (section.equals("food")) {
-
-            ArrayList<Boolean> checkStates = getCheckValues(food);
-            String[] foodList = food.split("\\[ \\] |\\[x\\] ");
-            System.out.println("Which item would you like to edit? \n\n" + addNumberToCheck(food));
-            int index = TextIO.getlnInt();
-            System.out.print("Enter number:");
-            checkStates = invertBoolean(checkStates, index);
-            food = makeCheckList(foodList, checkStates);
-
-        } else if (section.equals("tasks")) {
-
-            ArrayList<Boolean> checkStates = getCheckValues(tasks);
-            String[] taskList = tasks.split("\\[ \\] |\\[x\\] ");
-            System.out.println("Which task would you like to edit? \n\n" + addNumberToCheck(tasks));
-            int index = TextIO.getlnInt();
-            System.out.print("Enter number:");
-            checkStates = invertBoolean(checkStates, index);
-            tasks = makeCheckList(taskList, checkStates);
-        }
-
-        String text = "Date: " + date + "\n\n" +
-                "Weight: "+ weight + " Kg\n\n" +
-                "Food:\n" +
-                food + "\n\n" + "Tasks:\n" +
-                tasks;
-
-        writeToFile(fileName, "\n" + text, true);
-        System.out.println(text);
-
-    }
-
     public ArrayList<Boolean> invertBoolean(ArrayList<Boolean> checkStates, int index) {
         if (checkStates.get(index)) {
             checkStates.set(index, false);
@@ -531,18 +358,8 @@ public class Schedule {
 
     public void makeNewDayScheduleFX(String fileName, String date, double weight, String food, String tasks, ArrayList<Boolean> foodCheckBoxValues, ArrayList<Boolean> tasksCheckBoxValues) {
 
-
-        // Food input formatting into a checklist
         food = makeCheckList(food);
-        if (food.equals("none")) {
-            food = "No food.";
-        }
-
-        // Task input formatting into a checklist
         tasks = makeCheckList(tasks);
-        if (tasks.equals("none")) {
-            tasks = "No tasks.";
-        }
 
         ArrayList<Boolean> outFoodCheckBoxValues = getCheckValues(food);
         ArrayList<Boolean> outTasksCheckBoxValues = getCheckValues(tasks);
@@ -555,6 +372,7 @@ public class Schedule {
                 outFoodCheckBoxValues.set(i, foodCheckBoxValues.get(i));
             }
         }
+
         if (outTasksCheckBoxValues.size() <= tasksCheckBoxValues.size()) {
             for (int i = 0; i < outTasksCheckBoxValues.size(); i++) {
                 outTasksCheckBoxValues.set(i, tasksCheckBoxValues.get(i));
@@ -566,6 +384,13 @@ public class Schedule {
         }
         food = makeCheckList(food.split("\\[ \\] |\\[x\\] "), outFoodCheckBoxValues);
         tasks = makeCheckList(tasks.split("\\[ \\] |\\[x\\] "), outTasksCheckBoxValues);
+
+        if (food.equals("")) {
+            food = "No food.";
+        }
+        if (tasks.equals("")) {
+            tasks = "No tasks.";
+        }
 
         // The schedule being made
         String schedule = "\n" + "\n" + "Date: " + date + "\n\n" +

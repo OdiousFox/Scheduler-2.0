@@ -12,6 +12,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,7 +21,7 @@ public class FXMenu extends Application {
 
     Schedule schedule = new Schedule();
 
-    String fileName = "Pschedule.txt";
+    String fileName = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "Pschedule.txt";
 
     TableView<Date> dateTableView;
 
@@ -42,8 +43,12 @@ public class FXMenu extends Application {
         launch(args);
     }
 
+
+
     @Override
     public void start(Stage stage) throws Exception {
+        File file = new File(System.getProperty("user.home") + File.separator + "Documents" + File.separator + "Pschedule.txt");
+        file.createNewFile();
         // Window itself.
         window = stage;
         window.setTitle("Scheduler");
@@ -54,7 +59,7 @@ public class FXMenu extends Application {
 
         // UI Buttons.
         Button buttonNew = new Button("New");
-        Button buttonSettings = new Button("Settings");
+//        Button buttonSettings = new Button("Settings");
         Button buttonExit = new Button("Exit");
 
         // Buttons for NEW command.
@@ -128,7 +133,7 @@ public class FXMenu extends Application {
 
         // x y positions of top bar buttons.
         GridPane.setConstraints(buttonNew, 0, 0);
-        GridPane.setConstraints(buttonSettings,2, 0);
+//        GridPane.setConstraints(buttonSettings,2, 0);
         GridPane.setConstraints(buttonExit, 0, 0);
 
         // x y positions of New, Display date and Edit command elements.
@@ -183,7 +188,7 @@ public class FXMenu extends Application {
         dateTableView.getColumns().setAll(dateColumn, weightColumn, foodColumn, tasksColumn);
 
         // Adds buttons to top bar
-        topBarLeft.getChildren().addAll(buttonNew, buttonSettings);
+        topBarLeft.getChildren().addAll(buttonNew);
         // Adds exit button to top bar
         topBarRight.getChildren().addAll(buttonExit);
         // Adds dateTableView to date list
@@ -209,6 +214,8 @@ public class FXMenu extends Application {
             // food   -> 2
             // tasks  -> 3
             AtomicReference<ArrayList<String>> dateInfo = new AtomicReference<>(schedule.extractDateValues(fileName, currentDate));
+            editFoodCheckBoxValues = schedule.getCheckValues(dateInfo.get().get(2));
+            editTasksCheckBoxValues = schedule.getCheckValues(dateInfo.get().get(3));
             dateText.setText(dateInfo.get().get(0));
             weightText.setText(dateInfo.get().get(1));
             String[] foodList = dateInfo.get().get(2).split("\\[ \\] |\\[x\\] ");
@@ -476,8 +483,6 @@ public class FXMenu extends Application {
                 }
             }
 
-
-
             try {
                 weight = Double.parseDouble(inputWeight.getText());
                 if (Double.parseDouble(inputWeight.getText()) > 635) {
@@ -488,6 +493,7 @@ public class FXMenu extends Application {
                 inputWeight.setStyle("-fx-text-box-border: #b22222; -fx-focus-color: #B22222;");
                 weightCheck = false;
             }
+
             if (dateCheck && weightCheck) {
                 if (editingActive) {
                     schedule.deleteDate(fileName, date);
@@ -495,6 +501,9 @@ public class FXMenu extends Application {
                 } else {
                     schedule.makeNewDayScheduleFX(fileName, date, weight, fieldsToString(foodFields), fieldsToString(taskFields));
                 }
+
+                ArrayList<String> dateInfo = schedule.extractDateValues(fileName, date);
+
                 resetNewCommand(buttonNewComplete, buttonNewCancel, buttonAddFood,
                         buttonRemoveFood, buttonAddTasks, buttonRemoveTasks, inputDate,
                         inputWeight, labelFood, foodFields, labelTasks, taskFields, newSchedule);
