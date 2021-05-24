@@ -10,10 +10,17 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import jfxtras.styles.jmetro.JMetro;
+import jfxtras.styles.jmetro.JMetroStyleClass;
+import jfxtras.styles.jmetro.Style;
 
 import java.io.File;
+import java.nio.channels.CancelledKeyException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -60,7 +67,7 @@ public class FXMenu extends Application {
         // UI Buttons.
         Button buttonNew = new Button("New");
 //        Button buttonSettings = new Button("Settings");
-        Button buttonExit = new Button("Exit");
+//        Button buttonExit = new Button("Exit");
 
         // Buttons for NEW command.
         Button buttonNewComplete = new Button("Complete");
@@ -94,10 +101,12 @@ public class FXMenu extends Application {
         ArrayList<CheckBox> checkBoxTasks = new ArrayList<>();
         checkBoxTasks.add(new CheckBox());
 
+        // Getting the current date
+        String timeStamp = new SimpleDateFormat("dd.MM.yyyy").format(Calendar.getInstance().getTime());
         // Buttons and Label for dateListButtons
         Button buttonDateDelete = new Button("Delete");
         Button buttonDateEdit = new Button("Edit");
-        Label viewedDate = new Label("Current date: none");
+        Label viewedDate = new Label("Current date: " + timeStamp);
 
         // Top bar layout used for New and Settings buttons.
         GridPane topBarLeft = new GridPane();
@@ -132,9 +141,9 @@ public class FXMenu extends Application {
         dateListInteraction.setRight(dateListButtons);
 
         // x y positions of top bar buttons.
-        GridPane.setConstraints(buttonNew, 0, 0);
+        GridPane.setConstraints(buttonNew, 0, 1);
 //        GridPane.setConstraints(buttonSettings,2, 0);
-        GridPane.setConstraints(buttonExit, 0, 0);
+//        GridPane.setConstraints(buttonExit, 0, 0);
 
         // x y positions of New, Display date and Edit command elements.
         GridPane.setConstraints(labelDate, 1, 10);
@@ -165,37 +174,42 @@ public class FXMenu extends Application {
         // Does list date things
 
         TableColumn<Date, String> dateColumn = new TableColumn<>("Date");
-        dateColumn.setMinWidth(75);
+        dateColumn.setMinWidth(93);
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("Date"));
+        dateColumn.setSortable(false);
 
         TableColumn<Date, String> weightColumn = new TableColumn<>("Weight");
-        weightColumn.setMinWidth(50);
+        weightColumn.setMinWidth(78);
+        weightColumn.setStyle("-fx-alignment: CENTER");
         weightColumn.setCellValueFactory(new PropertyValueFactory<>("Weight"));
+        weightColumn.setSortable(false);
 
         TableColumn<Date, String> foodColumn = new TableColumn<>("Food");
-        foodColumn.setMinWidth(25);
+        foodColumn.setMinWidth(65);
         foodColumn.setStyle("-fx-alignment: CENTER");
         foodColumn.setCellValueFactory(new PropertyValueFactory<>("Food"));
+        foodColumn.setSortable(false);
 
         TableColumn<Date, String> tasksColumn = new TableColumn<>("Tasks");
-        tasksColumn.setMinWidth(25);
+        tasksColumn.setMinWidth(67);
         tasksColumn.setStyle("-fx-alignment: CENTER");
         tasksColumn.setCellValueFactory(new PropertyValueFactory<>("Tasks"));
+        tasksColumn.setSortable(false);
 
         dateTableView = new TableView<>();
         dateTableView.setItems(getDate());
-        dateTableView.setPrefWidth(245);
+        dateTableView.setPrefWidth(320);
         dateTableView.getColumns().setAll(dateColumn, weightColumn, foodColumn, tasksColumn);
 
         // Adds buttons to top bar
         topBarLeft.getChildren().addAll(buttonNew);
         // Adds exit button to top bar
-        topBarRight.getChildren().addAll(buttonExit);
+//        topBarRight.getChildren().addAll(buttonNew);
         // Adds dateTableView to date list
         dateList.getChildren().addAll(dateTableView);
 
         // Makes a new date when the NEW button is pressed
-        commandNew(buttonNew, buttonExit, buttonNewComplete, buttonNewCancel,
+        commandNew(buttonNew, buttonNewComplete, buttonNewCancel,
                 buttonAddFood, buttonRemoveFood, buttonAddTasks, buttonRemoveTasks,
                 labelDate, inputDate, labelWeight, inputWeight, labelFood, foodFields,
                 labelTasks, taskFields, newSchedule, dateTableView, dateDisplay);
@@ -216,12 +230,12 @@ public class FXMenu extends Application {
             AtomicReference<ArrayList<String>> dateInfo = new AtomicReference<>(schedule.extractDateValues(fileName, currentDate));
             editFoodCheckBoxValues = schedule.getCheckValues(dateInfo.get().get(2));
             editTasksCheckBoxValues = schedule.getCheckValues(dateInfo.get().get(3));
-            dateText.setText(dateInfo.get().get(0));
+            dateText.setText(" " + dateInfo.get().get(0));
             weightText.setText(dateInfo.get().get(1));
             String[] foodList = dateInfo.get().get(2).split("\\[ \\] |\\[x\\] ");
             String[] tasksList = dateInfo.get().get(3).split("\\[ \\] |\\[x\\] ");
 
-            viewedDate.setText("Current date: " + currentDate);
+//            viewedDate.setText("Current date: " + currentDate);
             buttonDateDelete.setOnAction(f -> {
                 schedule.deleteDate(fileName, currentDate);
                 dateTableView.getItems().clear();
@@ -395,10 +409,12 @@ public class FXMenu extends Application {
         root.setRight(rightPane);
 
         // Sets layout, window size, scene and then displays the window.
-        Scene scene = new Scene(root, 600, 550);
+        Scene scene = new Scene(root, 657, 480);
         window.setScene(scene);
         window.show();
-
+        JMetro jMetro = new JMetro(Style.DARK);
+        root.getStyleClass().add(JMetroStyleClass.BACKGROUND);
+        jMetro.setScene(scene);
     }
 
     // Gets all of the dates
@@ -441,7 +457,7 @@ public class FXMenu extends Application {
 
 
 
-    private void commandNew(Button buttonNew, Button buttonExit, Button buttonNewComplete, Button buttonNewCancel,
+    private void commandNew(Button buttonNew, Button buttonNewComplete, Button buttonNewCancel,
                             Button buttonAddFood, Button buttonRemoveFood, Button buttonAddTasks, Button buttonRemoveTasks,
                             Label labelDate, TextField inputDate, Label labelWeight, TextField inputWeight, Label labelFood,
                             ArrayList<TextField> foodFields, Label labelTasks, ArrayList<TextField> taskFields, GridPane newSchedule,
@@ -475,7 +491,7 @@ public class FXMenu extends Application {
                 date = schedule.formatDate(inputDate.getText());
                 inputDate.setStyle("");
             } else {
-                inputDate.setStyle("-fx-text-box-border: #b22222; -fx-focus-color: #B22222;");
+                inputDate.setStyle("-fx-border-color: #b22222;");
                 dateCheck = false;
                 if (editingActive) {
                     date = currentDate;
@@ -484,13 +500,20 @@ public class FXMenu extends Application {
             }
 
             try {
-                weight = Double.parseDouble(inputWeight.getText());
-                if (Double.parseDouble(inputWeight.getText()) > 635) {
+
+                if (inputWeight.getText().contains(",")) {
+                    weight = Double.parseDouble(inputWeight.getText().replace(",", "."));
+                    System.out.println(inputWeight.getText().replace(",", "."));
+                } else {
+                    weight = Double.parseDouble(inputWeight.getText());
+                }
+
+                if (weight > 635) {
                     throw new NumberFormatException("");
                 }
                 inputWeight.setStyle("");
             } catch (NumberFormatException f) {
-                inputWeight.setStyle("-fx-text-box-border: #b22222; -fx-focus-color: #B22222;");
+                inputWeight.setStyle("-fx-border-color: #b22222;");
                 weightCheck = false;
             }
 
@@ -606,7 +629,7 @@ public class FXMenu extends Application {
         });
 
         // Closes the window.
-        buttonExit.setOnAction(e -> window.close());
+//        buttonExit.setOnAction(e -> window.close());
     }
 
 
