@@ -5,7 +5,7 @@
 
 ![](https://i.imgur.com/Ng4xkqF.png)
 
-* Step 1.2 : Enter data
+* Step 2 : Enter data
 
 ![](https://i.imgur.com/MtMo4sl.png)
 
